@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container-sm my-5">
-        <form action="{{ route('employees.update', ['employee' => $employee->id]) }}" method="POST">
+        <form action="{{ route('employees.update', ['employee' => $employee->id]) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('put')
             <div class="row justify-content-center">
@@ -12,8 +12,7 @@
                         @foreach ($errors->all() as $error)
                             <div class="alert alert-danger alert-dismissible fade show" style="display: none;">
                                 {{ $error }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                    aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         @endforeach
                     @endif
@@ -42,8 +41,8 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input class="form-control @error('email') is-invalid @enderror" type="text"
-                                name="email" id="email" value="{{ $employee->email }}">
+                            <input class="form-control @error('email') is-invalid @enderror" type="text" name="email"
+                                id="email" value="{{ $employee->email }}">
                             @error('email')
                                 <div class="alert-danger text-danger">{{ $message }}</div>
                             @enderror
@@ -60,12 +59,27 @@
                             <label for="position" class="form-label">Position</label>
                             <select name="position" id="position" class="form-select">
                                 @foreach ($positions as $position)
-                                    <option value="{{ $position->id }}" {{ $employee->position_id == $position->id ? 'selected' : '' }}>{{ $position->code.' - '.$position->name }}</option>
+                                    <option value="{{ $position->id }}"
+                                        {{ $employee->position_id == $position->id ? 'selected' : '' }}>
+                                        {{ $position->code . ' - ' . $position->name }}</option>
                                 @endforeach
                             </select>
                             @error('position')
                                 <div class="text-danger"><small>{{ $message }}</small></div>
                             @enderror
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="cv" class="form-label">Curriculum Vitae (CV)</label>
+                            @if ($employee->original_filename)
+                                <h5>{{ $employee->original_filename }}</h5>
+                                <a href="{{ route('employees.downloadFile', ['employeeId' => $employee->id]) }}"
+                                    class="btn btn-primary btn-sm mt-2">
+                                    <i class="bi bi-download me-1"></i> Download CV
+                                </a>
+                            @else
+                                <h5>Tidak ada</h5>
+                            @endif
+                            <input type="file" class="form-control mt-3" name="cv" id="cv">
                         </div>
                     </div>
                     <hr>
