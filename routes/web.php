@@ -127,3 +127,13 @@ Route::get('/delete-public-file', function(Request $request) {
 
 Route::get('download-file/{employeeId}', [EmployeeController::class, 'downloadFile'])->name('employees.downloadFile');
 
+// ROUTE BARU UNTUK MODUL 10
+
+Route::get('getEmployees', [EmployeeController::class, 'getData'])->name('employees.getData');
+
+
+// ROUTE EXCEL DOWNLOAD
+Route::get('exportExcel', [EmployeeController::class, 'exportExcel'])->name('employees.exportExcel');
+
+// ROUTE KE PDF
+Route::get('exportPdf', [EmployeeController::class, 'exportPdf'])->name('employees.exportPdf');

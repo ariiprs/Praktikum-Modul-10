@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use PDF;
 use App\Models\Position;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\DB;
 // use App\Http\Controllers\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\EmployeesExport;
 
 
 
@@ -18,18 +22,14 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $pageTitle = 'Employee List';
+   public function index()
+{
+    $pageTitle = 'Employee List';
 
-        // ELOQUENT
-        $employees = Employee::all();
+    confirmDelete();
 
-        return view('employee.index', [
-            'pageTitle' => $pageTitle,
-            'employees' => $employees
-        ]);
-    }
+    return view('employee.index', compact('pageTitle'));
+}
 
     /**
      * Show the form for creating a new resource.
@@ -88,6 +88,8 @@ class EmployeeController extends Controller
         }
 
         $employee->save();
+
+        Alert::success('Added Successfully', 'Employee Data Added Successfully.');
 
         return redirect()->route('employees.index');
     }
@@ -167,6 +169,8 @@ class EmployeeController extends Controller
         }
         $employee->save();
 
+        Alert::success('Changed Successfully', 'Employee Data Changed Successfully.');
+
         return redirect()->route('employees.index');
     }
 
@@ -188,6 +192,7 @@ class EmployeeController extends Controller
         // Delete file
         Storage::disk('public')->delete('files/'.$encryptedFilename);
 
+        Alert::success('Deleted Successfully', 'Employee Data Deleted Successfully.');
 
         return redirect()->route('employees.index');
     }
@@ -204,5 +209,34 @@ class EmployeeController extends Controller
         }
     }
 
+    public function getData(Request $request)
+    {
+        $employees = Employee::with('position');
+
+        if ($request->ajax()) {
+            return datatables()->of($employees)
+                ->addIndexColumn()
+                ->addColumn('actions', function($employee) {
+                    return view('employee.actions', compact('employee'));
+                })
+                ->toJson();
+        }
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new EmployeesExport, 'employees.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $employees = Employee::all();
+
+        $pdf = PDF::loadView('employee.export_pdf', compact('employees'));
+
+        return $pdf->download('employees.pdf');
+    }
 
 }
+
+
